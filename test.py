@@ -2,7 +2,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from transitions.extensions import GraphMachine
 import logging
-
+import random
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
@@ -71,7 +71,7 @@ class TocMachine(GraphMachine):
         return text.lower() == 'any moe girl?'
     def is_going_to_state2(self, update):
         text = update.message.text
-        return text.lower() == 'go to menu'
+        return text.lower() == 'tell me something'
     
     def is_going_to_state3(self, update):
         text = update.message.text
@@ -79,28 +79,38 @@ class TocMachine(GraphMachine):
 
     def on_enter_state1(self, update):
         update.message.reply_text("here is your moe girl")
-        update.message.reply_photo('http://www.v3wall.com/wallpaper/1920_1080/1201/1920_1080_20120107124215764155.jpg')
+        select = random.randint(1,4)
+        if select == 1:
+            update.message.reply_photo('http://www.v3wall.com/wallpaper/1920_1080/1201/1920_1080_20120107124215764155.jpg')
+        elif select == 2:
+            update.message.reply_photo('https://i2.kknews.cc/SIG=ba8uqs/39n500044spoon747s1r.jpg')
+        elif select == 3:
+            update.message.reply_photo('https://i.pximg.net/c/600x600/img-master/img/2016/06/11/20/15/26/57343936_p0_master1200.jpg')
+        else:
+            update.message.reply_photo('https://farm7.static.flickr.com/6061/6046161500_3e06d987ee.jpg')
         self.go_back(update)
     def on_exit_state1(self, update):
         print('Leaving state1')
 
     def on_enter_state2(self, update):
         #update.message.reply_text("I'm entering state2")
-        keyboard = [[InlineKeyboardButton("Option 1", callback_data='1'),
-                 InlineKeyboardButton("Option 2", callback_data='2')],
-
-                [InlineKeyboardButton("Option 3", callback_data='3')]]
+        keyboard = [[InlineKeyboardButton("維基介紹", url='https://zh.wikipedia.org/wiki/%E5%91%BD%E9%81%8B%E7%9F%B3%E4%B9%8B%E9%96%80')],
+                [InlineKeyboardButton("動畫pv", url='https://www.youtube.com/watch?v=dd7BILZcYAY')],
+                [InlineKeyboardButton("巴哈姆特討論區", url='https://forum.gamer.com.tw/A.php?bsn=17358')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text("here is the menu",reply_markup=reply_markup)
-        query=update.callback_query
-        if query.data == '1':
-            self.go_back(update)
-        else:
-            self.gogoro(update)
-
+        update.message.reply_text("here is a recommanded anime",reply_markup=reply_markup)
+        self.go_back(update)
+       
     def on_exit_state2(self, update):
         print('Leaving state2')
 
+    def on_enter_state3(self, update):
+        update.message.reply_text("I'm entering state3")
+        self.go_go_otherstate(update)
+
+    def on_exit_state3(self, update):
+        print('Leaving state3')
+    
     def on_enter_state3(self, update):
         update.message.reply_text("I'm entering state3")
         self.go_go_otherstate(update)
