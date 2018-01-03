@@ -52,8 +52,8 @@ class TocMachine(GraphMachine):
                 {
                     'trigger': 'go_otherstate',
                     'source': 'state3',
-                    'dest': 'state4',
-                    'conditions':'is_going_to_state4'
+                    'dest': 'state4'
+                    #'conditions':'is_going_to_state4'
                 }
 
             ],
