@@ -1,5 +1,5 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup ,ReplyKeyboardMarkup,ReplyKeyboardRemove
 from transitions.extensions import GraphMachine
 import logging
 import random
@@ -44,20 +44,17 @@ class TocMachine(GraphMachine):
                     'source': [
                         'state1',
                         'state2',
-                        'state3'
+                        'state4'
+                        
                     ],
                     'dest': 'user'
                 },
                 {
                     'trigger': 'go_otherstate',
                     'source': 'state3',
-                    'dest': 'state1'
-                },
-                {
-                    'trigger': 'gogoro',
-                    'source': 'state2',
-                    'dest': 'state1'
-                },
+                    'dest': 'state4',
+                    'conditions':'is_going_to_state4'
+                }
 
             ],
             initial='user',
@@ -75,19 +72,28 @@ class TocMachine(GraphMachine):
     
     def is_going_to_state3(self, update):
         text = update.message.text
-        return text.lower() == 'want?'
+        return text.lower() == 'are u a good robot?'
+    def is_going_to_state4(self,update):
+        judge = 0 
+        if(update.message.text.lower()=='chose1'):
+            judge = 1
+        elif(update.message.text.lower()=='chose2'):
+            judge = 1
+        return judge == 1
 
     def on_enter_state1(self, update):
         update.message.reply_text("here is your moe girl")
-        select = random.randint(1,4)
+        select = random.randint(1,5)
         if select == 1:
             update.message.reply_photo('http://www.v3wall.com/wallpaper/1920_1080/1201/1920_1080_20120107124215764155.jpg')
         elif select == 2:
             update.message.reply_photo('https://i2.kknews.cc/SIG=ba8uqs/39n500044spoon747s1r.jpg')
         elif select == 3:
             update.message.reply_photo('https://i.pximg.net/c/600x600/img-master/img/2016/06/11/20/15/26/57343936_p0_master1200.jpg')
-        else:
+        elif select == 4:
             update.message.reply_photo('https://farm7.static.flickr.com/6061/6046161500_3e06d987ee.jpg')
+        else:
+            update.message.reply_photo('https://truth.bahamut.com.tw/s01/201507/7aecd9f64d4509479b78e3bbed1a7c9c.JPG')
         self.go_back(update)
     def on_exit_state1(self, update):
         print('Leaving state1')
@@ -97,8 +103,8 @@ class TocMachine(GraphMachine):
         keyboard = [[InlineKeyboardButton("維基介紹", url='https://zh.wikipedia.org/wiki/%E5%91%BD%E9%81%8B%E7%9F%B3%E4%B9%8B%E9%96%80')],
                 [InlineKeyboardButton("動畫pv", url='https://www.youtube.com/watch?v=dd7BILZcYAY')],
                 [InlineKeyboardButton("巴哈姆特討論區", url='https://forum.gamer.com.tw/A.php?bsn=17358')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text("here is a recommanded anime",reply_markup=reply_markup)
+        reply = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text("here is a recommanded anime",reply_markup=reply)
         self.go_back(update)
        
     def on_exit_state2(self, update):
@@ -106,17 +112,28 @@ class TocMachine(GraphMachine):
 
     def on_enter_state3(self, update):
         update.message.reply_text("I'm entering state3")
-        self.go_go_otherstate(update)
+        #testkeyboard = [['chose1'],['chose2']]
+        #reply_keybaord = ReplyKeyboardMarkup(testkeyboard)
+        #update.message.reply_text(text="which choice do u want to take",reply_markup=reply_keybaord)
+        self.go_otherstate(update)
 
     def on_exit_state3(self, update):
         print('Leaving state3')
     
-    def on_enter_state3(self, update):
-        update.message.reply_text("I'm entering state3")
-        self.go_go_otherstate(update)
+    
+    def on_enter_state4(self, update):
 
-    def on_exit_state3(self, update):
-        print('Leaving state3')
+        #reply_keybaord = ReplyKeyboardRemove()
+        #update.message.reply_text(text="done",reply_markup=reply_keybaord)
+        update.message.reply_text("yes i am")
+        #if(update.message.text.lower()=='chose1'):
+            #update.message.reply_text("I 11")
+        #else:
+            #update.message.reply_text("I22")
+        self.go_back(update)
+
+    def on_exit_state4(self, update):
+        print('Leaving state4')
     
 
 
@@ -139,6 +156,8 @@ def echo(bot, update):
     # update.message.reply_text(update.message.text)
     machine.advance(update)
 
+def echo2(bot, update):
+    machine.go_otherstate(update)
 
 def error(bot, update, error):
     """Log Errors caused by Updates."""
@@ -159,6 +178,7 @@ def main():
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
+    dp.add_handler(MessageHandler(Filters.text, echo2))
 
     # log all errors
     dp.add_error_handler(error)
