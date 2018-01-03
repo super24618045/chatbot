@@ -40,6 +40,12 @@ class TocMachine(GraphMachine):
                     'conditions': 'is_going_to_state3'
                 },
                 {
+                    'trigger': 'advance',
+                    'source': 'state3',
+                    'dest': 'state4',
+                    'conditions': 'is_going_to_state4'
+                },
+                {
                     'trigger': 'go_back',
                     'source': [
                         'state1',
@@ -48,12 +54,6 @@ class TocMachine(GraphMachine):
                         
                     ],
                     'dest': 'user'
-                },
-                {
-                    'trigger': 'go_otherstate',
-                    'source': 'state3',
-                    'dest': 'state4'
-                    #'conditions':'is_going_to_state4'
                 }
 
             ],
@@ -72,7 +72,7 @@ class TocMachine(GraphMachine):
     
     def is_going_to_state3(self, update):
         text = update.message.text
-        return text.lower() == 'are u a good robot?'
+        return text.lower() == 'lets play a game'
     def is_going_to_state4(self,update):
         judge = 0 
         if(update.message.text.lower()=='chose1'):
@@ -112,24 +112,22 @@ class TocMachine(GraphMachine):
 
     def on_enter_state3(self, update):
         update.message.reply_text("I'm entering state3")
-        #testkeyboard = [['chose1'],['chose2']]
-        #reply_keybaord = ReplyKeyboardMarkup(testkeyboard)
-        #update.message.reply_text(text="which choice do u want to take",reply_markup=reply_keybaord)
-        self.go_otherstate(update)
+        testkeyboard = [['chose1'],['chose2']]
+        reply_keybaord = ReplyKeyboardMarkup(testkeyboard)
+        update.message.reply_text(text="which choice do u want to make",reply_markup=reply_keybaord)
+     
 
     def on_exit_state3(self, update):
         print('Leaving state3')
     
-    
     def on_enter_state4(self, update):
 
-        #reply_keybaord = ReplyKeyboardRemove()
-        #update.message.reply_text(text="done",reply_markup=reply_keybaord)
-        update.message.reply_text("yes i am")
-        #if(update.message.text.lower()=='chose1'):
-            #update.message.reply_text("I 11")
-        #else:
-            #update.message.reply_text("I22")
+        reply_keybaord = ReplyKeyboardRemove()
+        update.message.reply_text(text="",reply_markup=reply_keybaord)
+        if(update.message.text.lower()=='chose1'):
+            update.message.reply_text("bad choice")
+        else:
+            update.message.reply_text("good choice")
         self.go_back(update)
 
     def on_exit_state4(self, update):
@@ -156,8 +154,6 @@ def echo(bot, update):
     # update.message.reply_text(update.message.text)
     machine.advance(update)
 
-def echo2(bot, update):
-    machine.go_otherstate(update)
 
 def error(bot, update, error):
     """Log Errors caused by Updates."""
@@ -178,7 +174,7 @@ def main():
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
-    dp.add_handler(MessageHandler(Filters.text, echo2))
+    #dp.add_handler(MessageHandler(Filters.text, echo2))
 
     # log all errors
     dp.add_error_handler(error)
